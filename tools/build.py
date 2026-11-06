@@ -50,6 +50,8 @@ def md(text):
     flush()
     return "\n".join(out)
 
+FOOTER = ""
+
 def page(title, body, back=None):
     nav = f'<p><a href="{back[1]}">{back[0]}</a></p>' if back else ""
     return f"""<!doctype html>
@@ -58,7 +60,7 @@ def page(title, body, back=None):
 <body>
 {nav}
 {body}
-<footer>Harborlight Apps</footer>
+<footer>{html.escape(FOOTER)}</footer>
 </body></html>
 """
 
@@ -83,9 +85,7 @@ Subscriptions are sold and billed by Apple. To cancel, open Settings on your iPh
 To ask what we hold or to have it deleted, email us and follow the steps in section 4 of the [Privacy Policy](/astir/privacy/).
 """
 
-INDEX = """# Harborlight Apps
-
-Apps for iPhone.
+INDEX = """# Apps for iPhone
 
 - [Astir: Heavy Sleeper Alarm](/astir/privacy/) — Privacy Policy
 - [Astir: Heavy Sleeper Alarm](/astir/support/) — Support
@@ -97,6 +97,8 @@ def main():
     values = dict(a[6:].split("=", 1) for a in sys.argv[1:] if a.startswith("--set=") and "=" in a[6:])
     if not args:
         sys.exit(__doc__)
+    global FOOTER
+    FOOTER = values.get("PUBLISHER_NAME", "")
     src = pathlib.Path(args[0]).read_text(encoding="utf-8")
     marker = "# Публикуемый текст"
     policy = src.split(marker, 1)[1] if marker in src else src
@@ -104,7 +106,7 @@ def main():
     for k, v in values.items():
         policy = policy.replace("{{" + k + "}}", v)
     pages = {
-        "index.html": page("Harborlight Apps", md(INDEX)),
+        "index.html": page("Apps for iPhone", md(INDEX)),
         "astir/privacy/index.html": page("Astir — Privacy Policy", md(policy), ("Support", "/astir/support/")),
         "astir/support/index.html": page("Astir — Support", md(SUPPORT), ("Privacy Policy", "/astir/privacy/")),
     }
